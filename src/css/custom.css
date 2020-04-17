@@ -142,3 +142,59 @@ body {
 .my-border {
     border-color: #3949AB !important;
 }
+
+.icon {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    background-size: cover;
+}
+
+.icon-indexfinger-not-enrolled{
+    background-image: url("/res/svg/indexfinger_not_enrolled.svg");
+}
+
+.icon-indexfinger-enrolled{
+    background-image: url("/res/svg/indexfinger_enrolled.svg");
+}
+
+.icon-middlefinger-not-enrolled{
+    background-image: url("/res/svg/middlefinger_not_enrolled.svg");
+}
+
+.icon-middlefinger-enrolled{
+    background-image: url("/res/svg/middlefinger_enrolled.svg");
+}
+
+.capture-indexfinger{
+    animation-duration: 500ms;
+    animation-name: blink-index-finger;
+    animation-iteration-count: infinite;
+}
+
+.capture-middlefinger{
+    animation-duration: 500ms;
+    animation-name: blink-middle-finger;
+    animation-iteration-count: infinite;
+}
+
+@keyframes blink-index-finger{
+    from{
+        background-image: url("/res/svg/indexfinger_not_enrolled.svg");
+    }
+
+    to{
+        background-image: url("/res/svg/indexfinger-anim.svg");
+    }
+}
+
+@keyframes blink-middle-finger{
+    from{
+        background-image: url("/res/svg/middlefinger_not_enrolled.svg");
+    }
+
+    to{
+        background-image: url("/res/svg/middlefinger-anim.svg");
+    }
+}
+

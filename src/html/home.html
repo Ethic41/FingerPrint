@@ -20,16 +20,16 @@
     <script src="/src/js/bootstrap.bundle.js"></script>
     <script src="/src/js/es6-shim.js"></script>
     <script src="/src/js/websdk.client.bundle.min.js"></script>
-    <!--<script src="/src/js/app.js"></script>-->
+    <script src="/src/js/fingerprint.sdk.min.js"></script>
     <script src="/src/js/custom.js"></script>
 
     <div class="container">
         <div id="controls" class="row justify-content-center mx-5 mx-sm-0 mx-lg-5">
             <div class="col-sm mb-2 ml-sm-5">
-                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#createEnrollment">Create Enrollment</button>
+                <button id="createEnrollmentButton" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#createEnrollment" onclick="beginEnrollment()">Create Enrollment</button>
             </div>
             <div class="col-sm mb-2 mr-sm-5">
-                <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#verifyIdentity">Verify Identity</button>
+                <button id="verifyIdentityButton" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#verifyIdentity" onclick="beginIdentification()">Verify Identity</button>
             </div>
         </div>
     </div>
@@ -42,21 +42,27 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title my-text my-pri-color" id="createEnrollmentTitle">Create Enrollment</h3>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearCapture()">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="">
-                        <div id="enrollmentStatusField">
+                    <form action="#">
+                        <div id="enrollmentStatusField" class="text-center">
                             <!--Enrollment Status will be displayed Here-->
                         </div>
                         <div class="form-row mt-3">
                             <div class="col mb-3 mb-md-0 text-center">
-                                <label for="readerSelect" class="my-text7 my-pri-color">Choose Fingerprint Reader</label>
-                                <select name="readerSelect" id="readerSelect" class="form-control" onchange="">
+                                <label for="enrollReaderSelect" class="my-text7 my-pri-color">Choose Fingerprint Reader</label>
+                                <select name="readerSelect" id="enrollReaderSelect" class="form-control" onclick="beginEnrollment()">
                                     <option selected>Select Fingerprint Reader</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="form-row mt-2">
+                            <div class="col mb-3 mb-md-0 text-center">
+                                <label for="userIDEnroll" class="my-text7 my-pri-color">Specify UserID</label>
+                                <input id="userID" type="text" class="form-control" required>
                             </div>
                         </div>
                         <div class="form-row mt-1">
@@ -66,19 +72,16 @@
                         </div>
                         <div id="indexFingers" class="form-row justify-content-center">
                             <div id="indexfinger1" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/indexfinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div id="indexfinger2" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/indexfinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div id="indexfinger3" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/indexfinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div id="indexfinger4" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/indexfinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
-                            </div>
-                            <div class="col">
-                                <button class="btn btn-primary my-text8 mt-sm-4 ml-lg-4" type="button">Capture</button>
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                         </div>
                         <div class="form-row mt-1">
@@ -89,24 +92,27 @@
                         <div id="middleFingers" class="form-row justify-content-center">
                             <!--TODO: if time allows animate fingerprint-->
                             <div id="middleFinger1" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/middlefinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-middlefinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div id="middleFinger2" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/middlefinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-middlefinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div id="middleFinger3" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/middlefinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-middlefinger-not-enrolled" title="not_enrolled"></span>
                             </div>
-                            <div id="middleFinger4" class="col mb-3 mb-md-0 text-center">
-                                <img src="/res/svg/middlefinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
-                            </div>
-                            <div class="col">
-                                <button class="btn btn-primary my-text8 mt-sm-3 ml-lg-4" type="button">Capture</button>
+                            <div id="middleFinger4" class="col mb-3 mb-md-0 text-center" value="true">
+                                <span class="icon icon-middlefinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                         </div>
                         <div class="form-row m-3 mt-md-5 justify-content-center">
-                            <div class="col-md-6">
+                            <div class="col-4">
+                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="button" onclick="beginCapture()">Start Capture</button>
+                            </div>
+                            <div class="col-4">
                                 <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="button" >Enroll</button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-secondary btn-outline-warning btn-block my-text-button py-1 border-0" type="button" onclick="clearCapture()">Clear</button>
                             </div>
                         </div>
                     </form>
@@ -114,7 +120,7 @@
                 <div class="modal-footer">
                     <div class="form-row">
                         <div class="col">
-                            <button class="btn btn-secondary my-text8" type="button" data-dismiss="modal">Close</button>
+                            <button class="btn btn-secondary my-text8 btn-outline-danger border-0" type="button" data-dismiss="modal" onclick="clearCapture()">Close</button>
                         </div>
                     </div>
                 </div>
@@ -130,30 +136,30 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title my-text my-pri-color" id="verifyIdentityTitle">Identity Verification</h3>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clearCapture()">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="">
-                        <div id="verifyIdentityStatusField">
+                    <form action="#">
+                        <div id="verifyIdentityStatusField" class="text-center">
                             <!--verifyIdentity Status will be displayed Here-->
                         </div>
                         <div class="form-row mt-3">
                             <div class="col mb-3 mb-md-0 text-center">
-                                <label for="verifyIdentityReaderSelect" class="my-text7 my-pri-color">Choose Fingerprint Reader</label>
-                                <select name="readerSelect" id="verifyIdentityReaderSelect" class="form-control" onchange="">
+                                <label for="verifyReaderSelect" class="my-text7 my-pri-color">Choose Fingerprint Reader</label>
+                                <select name="readerSelect" id="verifyReaderSelect" class="form-control" onclick="beginIdentification()">
                                     <option selected>Select Fingerprint Reader</option>
                                 </select>
                             </div>
                         </div>
                         <div class="form-row justify-content-center mt-3">
                             <div class="col">
-                                <label for="userId" class="my-text7 my-pri-color m-0">Enter UserID</label>
-                                <input type="text" id="userId" class="form-control mt-3">
+                                <label for="userId" class="my-text7 my-pri-color m-0">Specify UserID</label>
+                                <input type="text" id="userIDVerify" class="form-control mt-3" required>
                             </div>
                             <div id="verificationFinger" class="col mt-3 mb-md-0 text-center">
-                                <img src="/res/svg/indexfinger_not_enrolled.svg" alt="" width="64" height="64" title="indexfinger_not_enrolled">
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
                             </div>
                             <div class="col">
                                 <button class="btn btn-primary my-text8 mt-5 ml-lg-4" type="button">Capture</button>
@@ -169,7 +175,7 @@
                 <div class="modal-footer">
                     <div class="form-row">
                         <div class="col">
-                            <button class="btn btn-secondary my-text8" type="button" data-dismiss="modal">Close</button>
+                            <button class="btn btn-secondary my-text8" type="button" data-dismiss="modal" onclick="clearCapture()">Close</button>
                         </div>
                     </div>
                 </div>

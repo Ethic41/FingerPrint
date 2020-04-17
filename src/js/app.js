@@ -7,7 +7,8 @@ let myVal = ""; // Drop down selected value of reader
 let disabled = true;
 let startEnroll = false;
 
-let currentFormat = Fingerprint.SampleFormat.PngImage;
+let currentFormat = Fingerprint.SampleFormat.PngImage; // set the default format of image to png
+// device technology option type to choose from
 let deviceTechn = {
                0: "Unknown",
                1: "Optical",
@@ -15,14 +16,14 @@ let deviceTechn = {
                3: "Thermal",
                4: "Pressure"
             };
-
+// device modality type
 let deviceModality = {
                0: "Unknown",
                1: "Swipe",
                2: "Area",
                3: "AreaMultifinger"
             };
-
+// device UID type info here
 let deviceUidType = {
                0: "Persistent",
                1: "Volatile"
@@ -33,6 +34,7 @@ let FingerprintSdkTest = (function () {
         let _instance = this;
         this.operationToRestart = null;
         this.acquisitionStarted = false;
+        // instatiating the fingerprint sdk here
         this.sdk = new Fingerprint.WebApi;
         this.sdk.onDeviceConnected = function (e) {
             // Detects if the device is connected for which acquisition started
@@ -56,7 +58,7 @@ let FingerprintSdkTest = (function () {
         }
 
     }
-
+    // this is were finger print capture takes place
     FingerprintSdkTest.prototype.startCapture = function () {
         if (this.acquisitionStarted) // Monitoring if already started capturing
             return;
@@ -104,9 +106,10 @@ let FingerprintSdkTest = (function () {
 })();
 
 function showMessage(message){
+    alert(1);
     let _instance = this;
     //let statusWindow = document.getElementById("status");
-    let x = state.querySelectorAll("#status");
+    let x = state.querySelectorAll("#enrollmentStatusField");
     if(x.length !== 0){
         x[0].innerHTML = message;
     }
@@ -311,7 +314,7 @@ function readersDropDownPopulate(checkForRedirecting){ // Check for redirecting 
     myVal = "";
     let allReaders = test.getInfo();
     allReaders.then(function (successObj) {
-        let readersDropDownElement = document.getElementById("readersDropDown");
+        let readersDropDownElement = document.getElementById("readerSelect");
         readersDropDownElement.innerHTML ="";
         //First Element
         let option = document.createElement("option");
@@ -339,7 +342,7 @@ function checkReaderCount(successObj,checkForRedirecting){
    if(successObj.length === 0){
     alert("No reader detected. Please insert a reader.");
    }else if(successObj.length === 1){
-        document.getElementById("readersDropDown").selectedIndex = "1";
+        document.getElementById("readerSelect").selectedIndex = "1";
         if(checkForRedirecting){
             toggle_visibility(['content-capture','content-reader']);    
             enableDisableScanQualityDiv("content-capture"); // To enable disable scan quality div
@@ -351,7 +354,7 @@ function checkReaderCount(successObj,checkForRedirecting){
 }
 
 function selectChangeEvent(){
-    let readersDropDownElement = document.getElementById("readersDropDown");
+    let readersDropDownElement = document.getElementById("readerSelect");
     myVal = readersDropDownElement.options[readersDropDownElement.selectedIndex].value;
     disableEnable();
     onClear();

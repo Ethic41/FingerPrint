@@ -37,7 +37,7 @@
 
 <section>
     <!--Create Enrolment Section-->
-    <div class="modal fade" id="createEnrollment" tabindex="-1" aria-labelledby="createEnrollmentTitle" aria-hidden="true">
+    <div class="modal fade" id="createEnrollment" data-backdrop="static" tabindex="-1" aria-labelledby="createEnrollmentTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -47,7 +47,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="#">
+                    <form action="#" onsubmit="return false">
                         <div id="enrollmentStatusField" class="text-center">
                             <!--Enrollment Status will be displayed Here-->
                         </div>
@@ -61,7 +61,7 @@
                         </div>
                         <div class="form-row mt-2">
                             <div class="col mb-3 mb-md-0 text-center">
-                                <label for="userIDEnroll" class="my-text7 my-pri-color">Specify UserID</label>
+                                <label for="userID" class="my-text7 my-pri-color">Specify UserID</label>
                                 <input id="userID" type="text" class="form-control" required>
                             </div>
                         </div>
@@ -106,10 +106,10 @@
                         </div>
                         <div class="form-row m-3 mt-md-5 justify-content-center">
                             <div class="col-4">
-                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="button" onclick="beginCapture()">Start Capture</button>
+                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="submit" onclick="beginCapture()">Start Capture</button>
                             </div>
                             <div class="col-4">
-                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="button" >Enroll</button>
+                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="submit" onclick="serverEnroll()">Enroll</button>
                             </div>
                             <div class="col-4">
                                 <button class="btn btn-secondary btn-outline-warning btn-block my-text-button py-1 border-0" type="button" onclick="clearCapture()">Clear</button>
@@ -131,7 +131,7 @@
 
 <section>
     <!--Verify Identity Section-->
-    <div id="verifyIdentity" class="modal fade" tabindex="-1" aria-labelledby="verifyIdentityTitle" aria-hidden="true">
+    <div id="verifyIdentity" class="modal fade" data-backdrop="static" tabindex="-1" aria-labelledby="verifyIdentityTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -141,7 +141,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="#">
+                    <form action="#" onsubmit="return false">
                         <div id="verifyIdentityStatusField" class="text-center">
                             <!--verifyIdentity Status will be displayed Here-->
                         </div>
@@ -153,21 +153,34 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-row justify-content-center mt-3">
-                            <div class="col">
-                                <label for="userId" class="my-text7 my-pri-color m-0">Specify UserID</label>
-                                <input type="text" id="userIDVerify" class="form-control mt-3" required>
-                            </div>
-                            <div id="verificationFinger" class="col mt-3 mb-md-0 text-center">
-                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
-                            </div>
-                            <div class="col">
-                                <button class="btn btn-primary my-text8 mt-5 ml-lg-4" type="button">Capture</button>
+                        <div class="form-row mt-4">
+                            <div class="col mb-md-0 text-center">
+                                <label for="userIDVerify" class="my-text7 my-pri-color m-0">Specify UserID</label>
+                                <input type="text" id="userIDVerify" class="form-control mt-1" required>
                             </div>
                         </div>
+                        <div class="form-row mt-3">
+                            <div class="col text-center">
+                                <p class="my-text7 my-pri-color mt-1">Capture Verification Finger</p>
+                            </div>
+                        </div>
+                        <div id="verificationFingers" class="form-row justify-content-center">
+                            <div id="verificationFinger" class="col mb-md-0 text-center">
+                                <span class="icon icon-indexfinger-not-enrolled" title="not_enrolled"></span>
+                            </div>
+                        </div>
+                        <div class="form-row mt-3" id="userDetails">
+                            <!--this is where user details will be displayed-->
+                        </div>
                         <div class="form-row m-3 mt-md-5 justify-content-center">
-                            <div class="col-md-6">
-                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="button" >Identify</button>
+                            <div class="col-4">
+                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="submit" onclick="captureForIdentify()">Start Capture</button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-primary btn-block my-sec-bg my-text-button py-1" type="submit" onclick="serverIdentify()">Identify</button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-secondary btn-outline-warning btn-block my-text-button py-1 border-0" type="button" onclick="clearCapture()">Clear</button>
                             </div>
                         </div>
                     </form>
@@ -175,7 +188,7 @@
                 <div class="modal-footer">
                     <div class="form-row">
                         <div class="col">
-                            <button class="btn btn-secondary my-text8" type="button" data-dismiss="modal" onclick="clearCapture()">Close</button>
+                            <button class="btn btn-secondary my-text8 btn-outline-danger border-0" type="button" data-dismiss="modal" onclick="clearCapture()">Close</button>
                         </div>
                     </div>
                 </div>

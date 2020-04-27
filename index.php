@@ -7,4 +7,4 @@
 
 namespace fingerprint;
 
-require("../html/home.html");
+require("./src/html/home.html");

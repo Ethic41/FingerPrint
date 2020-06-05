@@ -380,7 +380,7 @@ function serverEnroll(){
                 showMessage(successMessage, "success");
             }
             else{
-                showMessage(failedMessage);
+                showMessage(`${failedMessage} ${this.responseText}`);
             }
         }
     };

@@ -20,7 +20,7 @@ if(!empty($_POST["data"])) {
     $user_id = $user_data->id;
     //this is not necessarily index_finger it could be
     //any finger we wish to identify
-    $index_finger_string = $encoder->createValidBase64FMD($user_data->index_finger[0]);
+    $index_finger_string = $encoder->createValidBase64FMD($user_data->index_finger[0]); //url base64 decoding
 
     $hand_data = json_decode(getUserFmds($user_id));
     $registered_index_finger = $encoder->createValidBase64FMD($hand_data[0]->indexfinger);
@@ -38,6 +38,7 @@ if(!empty($_POST["data"])) {
         echo json_encode($identifyResult);
     }
 }
+
 else{
     echo "nothing found!";
 }

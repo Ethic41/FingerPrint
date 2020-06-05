@@ -12,6 +12,7 @@ namespace fingerprint;
 require("../core/enrollment.php");
 require_once("../core/UrlEncode.php");
 require("../core/querydb.php");
+require_once("../core/Verification.php");
 
 $enroller = new Enrollment();
 $encoder = new UrlEncode();
@@ -29,18 +30,53 @@ if(!empty($_POST["data"])){
         $enroller->addFMDString($middle_finger_string_array);
         $enrolled_middle_finger_fmd_string = $enroller->createEnrollment();
         if(strlen($enrolled_middle_finger_fmd_string) > 20){
-            $enrolled_index_finger_fmd_string = $encoder->base64UrlEncode($enrolled_index_finger_fmd_string);
-            $enrolled_middle_finger_fmd_string = $encoder->base64UrlEncode($enrolled_middle_finger_fmd_string);
-            echo setUserFmds($user_id, $enrolled_index_finger_fmd_string, $enrolled_middle_finger_fmd_string);
+            /*we use pre-registration fmd because that is
+            how we implemented verify dll*/
+            if(!isDuplicate($encoder->createValidBase64FMD($index_finger_string_array[0]))){
+                $enrolled_index_finger_fmd_string = $encoder->base64UrlEncode($enrolled_index_finger_fmd_string);
+                $enrolled_middle_finger_fmd_string = $encoder->base64UrlEncode($enrolled_middle_finger_fmd_string);
+                echo setUserFmds($user_id, $enrolled_index_finger_fmd_string, $enrolled_middle_finger_fmd_string);
+            }
+            else{
+                echo "Duplicate not allowed!";
+            }
         }
         else{
-            echo "enrollment failed. here";
+            echo "Try Again";
         }
     }
     else{
-        echo "enrollment failed. try again";
+        echo "Please try again";
     }
 }
 else{
     echo "nothing came in";
+}
+
+function isDuplicate($fmd_to_check_string){
+    $encoder = new UrlEncode();
+    $identifier = new Verification();
+
+    $identifier->setFmdStringToIdentify($fmd_to_check_string);
+
+    $allFmds = json_decode(getAllFmds());
+
+    $identifier->clearFmdList();
+
+    foreach ($allFmds as $hand){
+        $identifier->addRegisteredFmds([$encoder->createValidBase64FMD($hand->indexfinger)]);
+        $identifier->addRegisteredFmds([$encoder->createValidBase64FMD($hand->middlefinger)]);
+    }
+
+    $identifyResult = $identifier->identify();
+
+    if($identifyResult === "success"){
+        return true;
+    }
+    elseif ($identifyResult === "failed no matching"){
+        return false;
+    }
+    else{
+        return true;
+    }
 }

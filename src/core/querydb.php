@@ -41,3 +41,10 @@ function getUserDetails($user_id){
     $user_info = $myDatabase->select($sql_query, $param_type, $param_array);
     return json_encode($user_info);
 }
+
+function getAllFmds(){
+    $myDatabase = new Database();
+    $sql_query = "select indexfinger, middlefinger from users where indexfinger != ''";
+    $allFmds = $myDatabase->select($sql_query);
+    return json_encode($allFmds);
+}

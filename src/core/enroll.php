@@ -61,6 +61,10 @@ function isDuplicate($fmd_to_check_string){
 
     $allFmds = json_decode(getAllFmds());
 
+    if (!$allFmds){ // there is nothing here, so nothing to do
+        return false;
+    }
+
     $identifier->clearFmdList();
 
     foreach ($allFmds as $hand){

@@ -9,13 +9,9 @@
 
 namespace fingerprint;
 
-require("../core/enrollment.php");
-require_once("../core/UrlEncode.php");
 require("../core/querydb.php");
-require_once("../core/Verification.php");
+require_once("../core/helpers/helpers.php");
 
-$enroller = new Enrollment();
-$encoder = new UrlEncode();
 
 if(!empty($_POST["data"])){
     $user_data = json_decode($_POST["data"]);
@@ -23,41 +19,36 @@ if(!empty($_POST["data"])){
     $index_finger_string_array = $user_data->index_finger;
     $middle_finger_string_array = $user_data->middle_finger;
 
-    $enroller->addFMDString($index_finger_string_array);
-    $enrolled_index_finger_fmd_string = $enroller->createEnrollment();
-    if(strlen($enrolled_index_finger_fmd_string) > 20){
-        $enroller->clearFMDs();
-        $enroller->addFMDString($middle_finger_string_array);
-        $enrolled_middle_finger_fmd_string = $enroller->createEnrollment();
-        if(strlen($enrolled_middle_finger_fmd_string) > 20){
-            /*we use pre-registration fmd because that is
-            how we implemented verify dll*/
-            if(!isDuplicate($encoder->createValidBase64FMD($index_finger_string_array[0]))){
-                $enrolled_index_finger_fmd_string = $encoder->base64UrlEncode($enrolled_index_finger_fmd_string);
-                $enrolled_middle_finger_fmd_string = $encoder->base64UrlEncode($enrolled_middle_finger_fmd_string);
-                echo setUserFmds($user_id, $enrolled_index_finger_fmd_string, $enrolled_middle_finger_fmd_string);
-            }
-            else{
-                echo "Duplicate not allowed!";
-            }
-        }
-        else{
-            echo "Try Again";
-        }
+    $pre_reg_fmd_array = [
+        "index_finger" => $index_finger_string_array,
+        "middle_finger" => $middle_finger_string_array
+    ];
+
+    // this check for duplicate is not necessary, only required if you want to
+    // avoid duplicate enrollment of the same finger, also you might have to improve it
+    // a bit to make it more robust, considering this is just a proof of concept and we
+    // are only checking a single finger
+    if (isDuplicate($index_finger_string_array[0]) || isDuplicate($middle_finger_string_array[0])) {
+        echo "Duplicate not allowed!";
     }
     else{
-        echo "Please try again";
+        $json_response = enroll_fingerprint($pre_reg_fmd_array);
+        $response = json_decode($json_response);
+        if ($response !== "enrollment failed"){
+            $enrolled_index_finger_fmd_string = $response->enrolled_index_finger;
+            $enrolled_middle_finger_fmd_string = $response->enrolled_middle_finger;
+            echo setUserFmds($user_id, $enrolled_index_finger_fmd_string, $enrolled_middle_finger_fmd_string);
+        }
+        else{
+            echo "$response";
+        }
     }
 }
 else{
-    echo "nothing came in";
+    echo "post request with 'data' field required";
 }
 
 function isDuplicate($fmd_to_check_string){
-    $encoder = new UrlEncode();
-    $identifier = new Verification();
-
-    $identifier->setFmdStringToIdentify($fmd_to_check_string);
 
     $allFmds = json_decode(getAllFmds());
 
@@ -65,22 +56,15 @@ function isDuplicate($fmd_to_check_string){
         return false;
     }
 
-    $identifier->clearFmdList();
+    $enrolled_hand_array = $allFmds;
 
-    foreach ($allFmds as $hand){
-        $identifier->addRegisteredFmds([$encoder->createValidBase64FMD($hand->indexfinger)]);
-        $identifier->addRegisteredFmds([$encoder->createValidBase64FMD($hand->middlefinger)]);
-    }
+    $json_response = is_duplicate_fingerprint($fmd_to_check_string, $enrolled_hand_array);
+    $response = json_decode($json_response);
 
-    $identifyResult = $identifier->identify();
-
-    if($identifyResult === "success"){
+    if($response){
         return true;
-    }
-    elseif ($identifyResult === "failed no matching"){
-        return false;
     }
     else{
-        return true;
+        return false;
     }
 }

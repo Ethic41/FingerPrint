@@ -8,37 +8,34 @@
 
 namespace fingerprint;
 
-require_once("../core/UrlEncode.php");
-require_once("../core/Verification.php");
+require_once("../core/helpers/helpers.php");
 require_once("../core/querydb.php");
-
-$encoder = new UrlEncode();
-$identifier = new Verification();
 
 if(!empty($_POST["data"])) {
     $user_data = json_decode($_POST["data"]);
     $user_id = $user_data->id;
     //this is not necessarily index_finger it could be
     //any finger we wish to identify
-    $index_finger_string = $encoder->createValidBase64FMD($user_data->index_finger[0]); //url base64 decoding
+    $pre_reg_fmd_string = $user_data->index_finger[0];
 
     $hand_data = json_decode(getUserFmds($user_id));
-    $registered_index_finger = $encoder->createValidBase64FMD($hand_data[0]->indexfinger);
-    $registered_middle_finger = $encoder->createValidBase64FMD($hand_data[0]->middlefinger);
 
-    $identifier->clearFmdList();
-    $identifier->addRegisteredFmds([$registered_index_finger, $registered_middle_finger]);
-    $identifier->setFmdStringToIdentify($index_finger_string);
+    $enrolled_fingers = [
+        "index_finger" => $hand_data[0]->indexfinger,
+        "middle_finger" => $hand_data[0]->middlefinger
+    ];
 
-    $identifyResult = $identifier->identify();
-    if($identifyResult === "success"){
+    $json_response = verify_fingerprint($pre_reg_fmd_string, $enrolled_fingers);
+    $response = json_decode($json_response);
+
+    if($response === "match"){
         echo getUserDetails($user_id);
     }
     else{
-        echo json_encode($identifyResult);
+        echo json_encode("failed");
     }
 }
 
 else{
-    echo "nothing found!";
+    echo "post request with 'data' field required";
 }

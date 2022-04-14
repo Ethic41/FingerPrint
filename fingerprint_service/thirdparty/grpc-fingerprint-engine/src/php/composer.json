@@ -1,0 +1,22 @@
+{
+    "name": "bexils/grpc-fingerprint-engine",
+    "description": "digital persona fingerprint engine grpc implementation",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Ethic41",
+            "email": "dahirmuhammad3@gmail.com"
+        }
+    ],
+    "require": {
+        "grpc/grpc": "v1.35.0",
+        "google/protobuf": "^v3.14.0"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Fingerprint\\": "Fingerprint/",
+            "GPBMetadata\\": "GPBMetadata/"
+        }
+      }
+}

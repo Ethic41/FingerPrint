@@ -1,0 +1,7 @@
+.idea
+.vscode
+vendor
+node_modules
+thirdparty/*
+!thirdparty/grpc-fingerprint-engine/src/protos
+!thirdparty/grpc-fingerprint-engine/src/php

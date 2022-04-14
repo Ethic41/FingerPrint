@@ -1,0 +1,31 @@
+{
+    "name": "vendor_name/r3y3s_fingerprint",
+    "description": "r3y3s_fingerprint",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+      {
+        "name": "Dahir Muhammad Dahir",
+        "email": "dahirmuhammad3@gmail.com"
+      }
+    ],
+    "require": {
+      "ext-mysqli": "*",
+      "ext-json": "*",
+      "google/cloud-storage": "^1.21",
+      "ircmaxell/random-lib": "^1.2",
+      "ext-sodium": "*",
+      "firebase/php-jwt": "^5.2",
+      "grpc/grpc": "v1.35.0",
+      "google/protobuf": "^v3.14.0",
+      "simplesoftwareio/simple-qrcode": "^4.2.0"
+    },
+  
+    "autoload": {
+      "psr-4": {
+          "Fingerprint\\": "thirdparty/grpc-fingerprint-engine/src/php/Fingerprint/",
+          "GPBMetadata\\": "thirdparty/grpc-fingerprint-engine/src/php/GPBMetadata/"
+      }
+    }
+  }
+  

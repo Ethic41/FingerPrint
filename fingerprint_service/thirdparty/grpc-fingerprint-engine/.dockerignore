@@ -1,0 +1,11 @@
+Dockerfile
+.vscode
+.gitignore
+dist/*
+thirdparty
+README.md
+.gitignore
+src/*
+!src/cpp
+!src/protos
+**/build/*

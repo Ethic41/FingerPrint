@@ -1,0 +1,47 @@
+/* 
+
+Bismillahirrahmanirraheem
+Author: Dahir Muhammad Dahir
+Date: 22-01-2021 02:47 PM
+About: I will tell you later
+
+*/
+
+syntax = "proto3";
+
+package fingerprint;
+
+service FingerPrint {
+    
+    rpc EnrollFingerprint(EnrollmentRequest) returns (EnrolledFMD) {};
+
+    rpc VerifyFingerprint(VerificationRequest) returns (VerificationResponse) {};
+
+    rpc CheckDuplicate(VerificationRequest) returns (CheckDuplicateResponse);
+
+}
+
+message PreEnrolledFMD {
+    string base64PreEnrolledFMD = 1;
+}
+
+message EnrolledFMD {
+    string base64EnrolledFMD = 1;
+}
+
+message EnrollmentRequest {
+    repeated PreEnrolledFMD fmdCandidates = 1;
+}
+
+message VerificationRequest {
+    PreEnrolledFMD targetFMD = 1;
+    repeated EnrolledFMD fmdCandidates = 2;
+}
+
+message VerificationResponse {
+    bool match = 1;
+}
+
+message CheckDuplicateResponse {
+    bool isDuplicate = 1;
+}

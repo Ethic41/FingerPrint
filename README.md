@@ -94,4 +94,4 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 ``` 
-Add some data and leave the index finger and middle finger columns empty.
+Add some data and leave the index finger and middle finger columns empty. Now you should be able to enroll and verify fingerprints.

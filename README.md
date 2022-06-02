@@ -23,7 +23,7 @@ the only way to interact with the fingerprint software engine was to use C++, ja
 ### The Solution
 We wrap the fingerprint engine with [grpc](https://grpc.io/) and [protobuf](https://developers.google.com/protocol-buffers/). This allows us to use the engine in any language supported by grpc and there are quite a lot of them. But this is not what this codebase is about. You can find the link to the grpc codebase [here](https://github.com/Bexils/grpc-fingerprint-engine). I realized most people just needed a solution they could plugin to their codebase and forget about it and hence why this codebase was created. It's an abstraction of the grpc solution, completely containerized with docker that can be setup and ready to use with just a few commands. This solution setup a web services on your local machine or server that can be used to make enrollment and verification requests.
 ## Getting started
-### Download SDK
+### Download SDK (Mandatory)
 Note: the SDK below is for windows only. Considering most people will be using the scanner on windows (i.e the frontend or client side), if you are already able to capture fingerprint with the device you don't even need this. The solution for the backend enrollment and verification service doesn't require any of this, as it's already packaged in the container.
 
 Unplug the fingerprint scanner from the device if connected.
@@ -33,13 +33,13 @@ Download the SDK below and install it, also install the patch and restart the co
 SDK v3 [Download](https://drive.google.com/open?id=1Hg3HAqwLuqmi9F4eUAgb5WaeLyJvPQq5)  
 SDKPatch [Download](https://drive.google.com/file/d/1yB0oW3NtBfCBKFHSe0Blc7B7grMD854W/view?usp=sharing)
 
-### Setup the web service
+### Setup the web service (Mandatory)
 Regardless of where you need to set this up, you will have to install docker, which is very easy to do. Of course you can also use the [grpc solution](https://github.com/Bexils/grpc-fingerprint-engine) without docker, if you already know how to use grpc.
 
-### Install Docker for Windows
+### Install Docker for Windows (Mandatory for windows users)
 Download Docker Desktop for windows [here](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe) or [visit the page](https://docs.docker.com/desktop/windows/install/) for more information.
 
-### Install Docker for Linux
+### Install Docker for Linux (Mandatory for windows users)
 For linux users, you can use the convenience script method or visit the official doc [here](https://docs.docker.com/engine/install/)
 
 ```bash
@@ -52,7 +52,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 # test the installation
 docker-compose --version
 ```
-### Build and Start the service
+### Build and Start the service (Mandatory)
 If you have done everything above correctly, you should be able to build and start the service.
 
 ```bash

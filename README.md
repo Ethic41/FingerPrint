@@ -34,7 +34,7 @@ SDK v3 [Download](https://drive.google.com/open?id=1Hg3HAqwLuqmi9F4eUAgb5WaeLyJv
 SDKPatch [Download](https://drive.google.com/file/d/1yB0oW3NtBfCBKFHSe0Blc7B7grMD854W/view?usp=sharing)
 
 ### Setup the web service (Mandatory for all users)
-Regardless of where you need to set this up, you will have to install docker, which is very easy to do. Of course you can also use the [grpc solution](https://github.com/Bexils/grpc-fingerprint-engine) without docker, if you already know how to use grpc.
+Regardless of where you need to set this up, you will have to install docker, which is very easy to do.
 
 ### Install Docker for Windows (Mandatory for windows users)
 Download Docker Desktop for windows [here](https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe) or [visit the page](https://docs.docker.com/desktop/windows/install/) for more information.

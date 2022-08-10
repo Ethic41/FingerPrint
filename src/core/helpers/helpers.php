@@ -8,7 +8,49 @@
  */
 require_once(__DIR__ . '/../../../configs.php');
 require_once('Requests/src/Autoload.php');
+require_once('sodium/autoload.php');
 WpOrg\Requests\Autoload::register();
+
+
+function encrypt(string $data_to_encrypt): string {
+    // get the encryption key from environment variable
+    $encryption_key = hex2bin(getenv("SECRET_KEY"));
+
+    $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+
+    $cipher = base64_encode($nonce . sodium_crypto_secretbox($data_to_encrypt, $nonce, $encryption_key));
+
+    sodium_memzero($data_to_encrypt);
+    sodium_memzero($encryption_key);
+
+    return $cipher;
+}
+
+function decrypt(string $data_to_decrypt): string {
+    // get the decryption key from environment variable
+    $decryption_key = hex2bin(getenv("SECRET_KEY"));
+    
+    // base64 decode data before decryption
+    $decoded_data = base64_decode($data_to_decrypt);
+    // get the nonce used during encryption
+    $nonce = mb_substr($decoded_data, 0, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, '8bit');
+    // extract the ciphertext without the nonce part, since already extracted above
+    $cipher = mb_substr($decoded_data, SODIUM_CRYPTO_SECRETBOX_NONCEBYTES, null, '8bit');
+
+    $decrypted_data = sodium_crypto_secretbox_open($cipher, $nonce, $decryption_key);
+
+    return $decrypted_data;
+}
+
+// $encrypted = encrypt("dahir");
+// $decrypted = decrypt($encrypted);
+
+// echo "encrypted: " . $encrypted;
+// echo "\n";
+
+// echo "decrypted: " . $decrypted;
+// echo "\n";
+
 
 /**
  * $pre_registered_fmd_array has the format

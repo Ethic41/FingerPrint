@@ -5,7 +5,7 @@
 Please note that php is not my primary language and this whole project started as a necessity. Since then I have made many iterations and improvements. What you have here is just a proof of concept. You might have to make a few easy tweaks to fit your needs
 ## Introduction
 This started when I needed to implement a fingerprint solution to an existing php codebase, with a very limited amount of time. Some of the challenges I faced were:
-- Lack of access to the software forum, in fact there was no one to reach the developers and seek for help.
+- Lack of access to the software forum, in fact there was no way to reach the developers and seek for help.
 - The SDK in my opinion was terribly lacking
 - The documentation left so many details out
 - Most importantly, there was no way to integrate with many languages, like python, php etc.

@@ -12,7 +12,7 @@ This started when I needed to implement a fingerprint solution to an existing ph
 
 Nonetheless, I managed to put together somewhat of a hack. It involved disassembling a dll, piecing together information cached by google from different parts of the forum when it was active and a lot of head banging. Initially this solution only worked on windows, using the [dotnet](link_here) feature of php. After several iterations, what you now have is a cross platform solution, without relying on php dotnet.
 ## So what is this really?
-This is an attempt to make using the fingerprint scanner without having to deal with the hurdles I faced when I started out.
+This is an attempt to make using the fingerprint scanner easy, without having to deal with the hurdles I faced when I started out.
 
 Initially, we had:
 

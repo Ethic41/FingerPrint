@@ -5,14 +5,14 @@
 Please note that php is not my primary language and this whole project started as a necessity. Since then I have made many iterations and improvements. What you have here is just a proof of concept. You might have to make a few easy tweaks to fit your needs
 ## Introduction
 This started when I needed to implement a fingerprint solution to an existing php codebase, with a very limited amount of time. Some of the challenges I faced were:
-- Lack of access to the software forum, in fact there was no one to reach the developers and seek for help.
+- Lack of access to the software forum, in fact there was no way to reach the developers and seek for help.
 - The SDK in my opinion was terribly lacking
 - The documentation left so many details out
 - Most importantly, there was no way to integrate with many languages, like python, php etc.
 
 Nonetheless, I managed to put together somewhat of a hack. It involved disassembling a dll, piecing together information cached by google from different parts of the forum when it was active and a lot of head banging. Initially this solution only worked on windows, using the [dotnet](link_here) feature of php. After several iterations, what you now have is a cross platform solution, without relying on php dotnet.
 ## So what is this really?
-This is an attempt to make using the fingerprint scanner easy to use without having to deal with the hurdles I faced when I started out.
+This is an attempt to make using the fingerprint scanner easy, without having to deal with the hurdles I faced when I started out.
 
 Initially, we had:
 

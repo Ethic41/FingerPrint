@@ -9,7 +9,7 @@
 require_once(__DIR__ . "/" . "../vendor/autoload.php");
 
 $client = new Fingerprint\FingerPrintClient("fingerprint_engine:4134", [
-    "credentials" => Grpc\ChannelCredentials::createInsecure(),
+    "credentials" => Grpc\ChannelCredentials::createSsl(),
 ]);
 
 function enroll_fingerprint($pre_fmd_string_array){

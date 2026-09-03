@@ -15,6 +15,12 @@ let FingerprintSdkTest = (function () {
         this.operationToRestart = null;
         this.acquisitionStarted = false;
         // instantiating the fingerprint sdk here
+        this.sdk = null;
+        if (typeof Fingerprint === "undefined" || typeof Fingerprint.WebApi !== "function") {
+            this.initializationError = "DigitalPersona Web SDK is unavailable. Install/start the Windows Web SDK runtime and reload the page.";
+            return;
+        }
+        this.initializationError = null;
         this.sdk = new Fingerprint.WebApi;
         this.sdk.onDeviceConnected = function (e) {
             // Detects if the device is connected for which acquisition started
@@ -40,6 +46,10 @@ let FingerprintSdkTest = (function () {
 
     // this is were finger print capture takes place
     FingerprintSdkTest.prototype.startCapture = function () {
+        if (!this.sdk) {
+            showMessage(this.initializationError);
+            return;
+        }
         if (this.acquisitionStarted) // Monitoring if already started capturing
             return;
         let _instance = this;
@@ -57,6 +67,8 @@ let FingerprintSdkTest = (function () {
     };
     
     FingerprintSdkTest.prototype.stopCapture = function () {
+        if (!this.sdk)
+            return;
         if (!this.acquisitionStarted) //Monitor if already stopped capturing
             return;
         let _instance = this;
@@ -73,12 +85,16 @@ let FingerprintSdkTest = (function () {
     };
 
     FingerprintSdkTest.prototype.getInfo = function () {
-        let _instance = this;
+        if (!this.sdk) {
+            showMessage(this.initializationError);
+            return Promise.resolve([]);
+        }
         return this.sdk.enumerateDevices();
     };
 
     FingerprintSdkTest.prototype.getDeviceInfoWithID = function (uid) {
-        let _instance = this;
+        if (!this.sdk)
+            return Promise.reject(new Error(this.initializationError));
         return  this.sdk.getDeviceInfo(uid);
     };
     
@@ -118,9 +134,11 @@ class Reader{
                 }
             }
             else{
-                showMessage("Please Connect the Fingerprint Reader");
+                showMessage(myReader.reader.initializationError || "No fingerprint reader was detected. Check the reader, driver, and DigitalPersona Web SDK service.");
             }
-        })
+        }, function(error) {
+            showMessage(`Unable to enumerate fingerprint readers: ${error.message || error}`);
+        });
     }
 }
 
@@ -171,7 +189,11 @@ function showMessage(message, message_type="error"){
     let statusFieldID = myReader.currentStatusField;
     if(statusFieldID){
         let statusField = document.getElementById(statusFieldID);
-        statusField.innerHTML = `<p class="my-text7 my-pri-color my-3 ${types.get(message_type)} font-weight-bold">${message}</p>`;
+        statusField.innerHTML = "";
+        let paragraph = document.createElement("p");
+        paragraph.className = `my-text7 my-pri-color my-3 ${types.get(message_type) || types.get("error")} font-weight-bold`;
+        paragraph.textContent = message;
+        statusField.appendChild(paragraph);
     }
 }
 
@@ -375,17 +397,20 @@ function serverEnroll(){
     let xhttp = new XMLHttpRequest();
 
     xhttp.onreadystatechange = function(){
-        if(this.readyState === 4 && this.status === 200){
-            if(this.responseText === "success"){
+        if(this.readyState === 4){
+            if(this.status === 200 && this.responseText === "success"){
                 showMessage(successMessage, "success");
             }
             else{
-                showMessage(`${failedMessage} ${this.responseText}`);
+                showMessage(`${failedMessage} ${readServerError(this.responseText, this.status)}`);
             }
         }
     };
+    xhttp.onerror = function() {
+        showMessage(`${failedMessage} Network request failed.`);
+    };
 
-    xhttp.open("POST", "/src/core/enroll.php", true);
+    xhttp.open("POST", new URL("src/core/enroll.php", document.baseURI), true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.send(payload);
 }
@@ -423,9 +448,26 @@ function serverIdentify() {
                 }
             }
         }
+        else if (this.readyState === 4) {
+            showMessage(`${failedMessage} ${readServerError(this.responseText, this.status)}`);
+        }
+    };
+    xhttp.onerror = function() {
+        showMessage(`${failedMessage} Network request failed.`);
     };
 
-    xhttp.open("POST", "/src/core/verify.php", true);
+    xhttp.open("POST", new URL("src/core/verify.php", document.baseURI), true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp.send(payload);
+}
+
+function readServerError(responseText, status) {
+    try {
+        let response = JSON.parse(responseText);
+        if (response && response.error)
+            return response.error;
+    } catch (error) {
+        // The legacy API uses plain-text responses.
+    }
+    return responseText || `Server returned HTTP ${status || 0}.`;
 }

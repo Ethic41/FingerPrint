@@ -1,0 +1,25 @@
+name: Compatibility checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-and-compose:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+      - name: Lint application PHP
+        run: find . -path './src/core/helpers/Requests' -prune -o -path './fingerprint_service/thirdparty' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Validate Compose configuration
+        run: docker compose -f fingerprint_service/docker-compose.yml config --quiet

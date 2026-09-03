@@ -5,6 +5,6 @@
  * About: I will tell you later
  */
 
-require_once("../coreComponents/UrlEncode.php");
-require_once("../coreComponents/fingerprint.php");
+require_once(__DIR__ . "/UrlEncode.php");
+require_once(__DIR__ . "/fingerprint.php");
 

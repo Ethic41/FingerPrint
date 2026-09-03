@@ -1,0 +1,10 @@
+<?php
+// Copy this file to configs.local.php. The copied file is ignored by Git.
+putenv('DB_HOST=127.0.0.1');
+putenv('DB_PORT=3306');
+putenv('DB_NAME=fingerprint');
+putenv('DB_USER=root');
+putenv('DB_PASSWORD=');
+putenv('FP_CLIENT_SERVICE_HOST=http://127.0.0.1:5555');
+putenv('FP_CLIENT_TIMEOUT=15');
+putenv('DIAGNOSTICS_ENABLED=1');

@@ -9,22 +9,41 @@
 namespace fingerprint;
 
 use mysqli;
+use RuntimeException;
+
+require_once(__DIR__ . '/../../configs.php');
 
 date_default_timezone_set("Africa/Lagos");
 
 class Database {
-    private const host = "localhost";
-    private const user = "root";
-    private const password = "";
-    private const database = "fingerprint";
     private $connection;
 
     function __construct(){
-        $this->connection = new mysqli(self::host, self::user, self::password, self::database);
-        if (mysqli_connect_errno()) {
-            printf("Connection Failed: %s\n",  mysqli_connect_errno());
-            exit();
+        if (!extension_loaded('mysqli')) {
+            throw new RuntimeException('The mysqli PHP extension is required.');
         }
+
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            $this->connection = new mysqli(
+                \fingerprint_config('DB_HOST', '127.0.0.1'),
+                \fingerprint_config('DB_USER', 'root'),
+                \fingerprint_config('DB_PASSWORD', ''),
+                \fingerprint_config('DB_NAME', 'fingerprint'),
+                (int) \fingerprint_config('DB_PORT', '3306')
+            );
+            $this->connection->set_charset('utf8mb4');
+        } catch (\mysqli_sql_exception $exception) {
+            throw new RuntimeException(
+                'Unable to connect to the configured MySQL database.',
+                0,
+                $exception
+            );
+        }
+    }
+
+    function ping(): bool {
+        return $this->connection->ping();
     }
 
     function getUserInfo($username): array {

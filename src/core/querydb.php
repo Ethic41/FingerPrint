@@ -7,7 +7,7 @@
  */
 
 namespace fingerprint;
-require_once("../core/Database.php");
+require_once(__DIR__ . "/Database.php");
 
 function setUserFmds($user_id, $index_finger_fmd_string, $middle_finger_fmd_string){
     $myDatabase = new Database();
@@ -44,7 +44,7 @@ function getUserDetails($user_id){
 
 function getAllFmds(){
     $myDatabase = new Database();
-    $sql_query = "select indexfinger, middlefinger from users where indexfinger != ''";
+    $sql_query = "select indexfinger, middlefinger from users where indexfinger is not null and indexfinger != ''";
     $allFmds = $myDatabase->select($sql_query);
     return json_encode($allFmds);
 }

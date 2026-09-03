@@ -10,6 +10,17 @@ require_once(__DIR__ . '/../../../configs.php');
 require_once('Requests/src/Autoload.php');
 WpOrg\Requests\Autoload::register();
 
+set_exception_handler(function (Throwable $exception) {
+    if (!headers_sent()) {
+        http_response_code(503);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+    echo json_encode([
+        'ok' => false,
+        'error' => $exception->getMessage(),
+    ]);
+});
+
 /**
  * $pre_registered_fmd_array has the format
  * [ "index_finger" => [array of 4 pre_reg fmd of index_finger],
@@ -21,7 +32,7 @@ WpOrg\Requests\Autoload::register();
  * otherwise returns 'enrollment failed' as string
  */
 function enroll_fingerprint($pre_registered_fmd_array){
-    $host = getenv('FP_CLIENT_SERVICE_HOST');
+    $host = rtrim(fingerprint_config('FP_CLIENT_SERVICE_HOST', 'http://127.0.0.1:5555'), '/');
     $enrollment_url = "$host/coreComponents/enroll.php";
 
     $data = ["data" => json_encode($pre_registered_fmd_array)];
@@ -45,7 +56,7 @@ function enroll_fingerprint($pre_registered_fmd_array){
  * storage you've stored the the enrollment fmd
 */
 function verify_fingerprint($pre_registered_fmd_string, $enrolled_fingers_array){
-    $host = getenv('FP_CLIENT_SERVICE_HOST');
+    $host = rtrim(fingerprint_config('FP_CLIENT_SERVICE_HOST', 'http://127.0.0.1:5555'), '/');
     $verify_url = "$host/coreComponents/verify.php";
     
     $data = [
@@ -85,7 +96,7 @@ function verify_fingerprint($pre_registered_fmd_string, $enrolled_fingers_array)
  * the function returns true if is there is duplicate and false otherwise
  */
 function is_duplicate_fingerprint($pre_registered_fmd_string, $enrolled_hands_array){
-    $host = getenv('FP_CLIENT_SERVICE_HOST');
+    $host = rtrim(fingerprint_config('FP_CLIENT_SERVICE_HOST', 'http://127.0.0.1:5555'), '/');
     $is_duplicate_url = "$host/coreComponents/is_duplicate.php";
 
     $data = [
@@ -106,7 +117,23 @@ function make_request($url, $data){
     
     $headers = array('Content-Type' => 'application/x-www-form-urlencoded');
     
-    $response = WpOrg\Requests\Requests::post($url, $headers, $data);
+    try {
+        $response = WpOrg\Requests\Requests::post($url, $headers, $data, [
+            'timeout' => (int) fingerprint_config('FP_CLIENT_TIMEOUT', '15'),
+        ]);
+    } catch (Exception $exception) {
+        throw new RuntimeException(
+            'Fingerprint service is unavailable at the configured address.',
+            0,
+            $exception
+        );
+    }
+
+    if ($response->status_code < 200 || $response->status_code >= 300) {
+        throw new RuntimeException(
+            sprintf('Fingerprint service returned HTTP %d.', $response->status_code)
+        );
+    }
     return $response->body;
 }
 

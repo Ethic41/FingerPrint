@@ -1,1 +1,3 @@
 *.idea
+configs.local.php
+.env

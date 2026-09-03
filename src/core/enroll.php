@@ -9,8 +9,8 @@
 
 namespace fingerprint;
 
-require("../core/querydb.php");
-require_once("../core/helpers/helpers.php");
+require(__DIR__ . "/querydb.php");
+require_once(__DIR__ . "/helpers/helpers.php");
 
 
 if(!empty($_POST["data"])){

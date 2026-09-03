@@ -7,7 +7,7 @@
  * @version 1.0.0
  */
 
-require_once("../coreComponents/basicRequirements.php");
+require_once(__DIR__ . "/basicRequirements.php");
 
 if(!empty($_POST["data"])) {
     $user_data = json_decode($_POST["data"]);

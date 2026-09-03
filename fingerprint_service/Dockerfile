@@ -4,10 +4,9 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer update && \
-    composer install && \
+RUN composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
     cd thirdparty/grpc-fingerprint-engine/src/php/ && \
-    composer update && \
-    composer install && \
-    apt update && apt install -y net-tools
+    composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
+    apt-get update && apt-get install -y --no-install-recommends net-tools && \
+    rm -rf /var/lib/apt/lists/*
 

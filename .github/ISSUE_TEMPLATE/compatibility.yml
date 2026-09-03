@@ -1,0 +1,53 @@
+name: Compatibility report
+description: Report Windows, XAMPP, reader, Docker, or hosted-deployment failures
+title: "[Compatibility]: "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach fingerprint samples, database passwords, tokens, or unredacted production logs.
+  - type: input
+    id: windows
+    attributes:
+      label: Windows edition and build
+      description: Run winver and include the complete edition, version and OS build.
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: XAMPP and PHP versions
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment profile
+      options:
+        - XAMPP and Docker on the same Windows PC
+        - Hosted PHP/MySQL and hosted fingerprint service
+        - Shared PHP hosting and external fingerprint service
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Include the diagnostics endpoint, windows-preflight.ps1, docker compose ps, and relevant container logs.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: browser
+    attributes:
+      label: Browser and reader status
+      description: Include browser/version, console errors, whether Device Manager sees the reader, and whether the DigitalPersona Web SDK service is running.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true

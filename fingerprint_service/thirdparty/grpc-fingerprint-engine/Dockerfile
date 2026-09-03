@@ -19,7 +19,8 @@ RUN apt update && apt install -y wget && \
 
 WORKDIR /app
 COPY src/ ./src
-RUN cd src/cpp/build && cmake ../ && make -j
+RUN cmake -S src/cpp -B src/cpp/build && \
+    cmake --build src/cpp/build --parallel
 
 FROM ubuntu:20.04
 

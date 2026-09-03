@@ -167,18 +167,23 @@ class FingerPrintImpl final : public FingerPrint::Service {
             string target_pre_fmd = base64_decode(verification_request->targetfmd().base64preenrolledfmd());
             MyFMD* target_pre_fmd_ptr = (MyFMD* ) target_pre_fmd.c_str();
 
-            map<MyFMD*, MyFMDSize*> target_verify_fmd_map = convert_fmd(DPFJ_FMD_DP_PRE_REG_FEATURES, DPFJ_FMD_DP_VER_FEATURES, target_pre_fmd_ptr, (MyFMDSize ) target_pre_fmd.size());
-
-            map<MyFMD*, MyFMDSize*>::iterator target_verify_fmd_map_it = target_verify_fmd_map.begin();
-
-            MyFMD* target_verify_fmd_ptr = target_verify_fmd_map_it->first;
-            MyFMDSize* target_verify_fmd_size = target_verify_fmd_map_it->second;
+            vector<MyFMD> target_verify_fmd = convert_fmd(DPFJ_FMD_DP_PRE_REG_FEATURES, DPFJ_FMD_DP_VER_FEATURES, target_pre_fmd_ptr, (MyFMDSize ) target_pre_fmd.size());
+            if (target_verify_fmd.empty()) {
+                VerificationResponse* conversion_failed = new VerificationResponse();
+                conversion_failed->set_match(false);
+                return conversion_failed;
+            }
 
             int candidates_count = verification_request->fmdcandidates_size();
+            if (candidates_count == 0) {
+                VerificationResponse* no_candidates = new VerificationResponse();
+                no_candidates->set_match(false);
+                return no_candidates;
+            }
 
-            string candidates_container[candidates_count];
-            MyFMD* candidates_pointers_container[candidates_count];
-            MyFMDSize candidates_size_container[candidates_count];
+            vector<string> candidates_container(candidates_count);
+            vector<MyFMD*> candidates_pointers_container(candidates_count);
+            vector<MyFMDSize> candidates_size_container(candidates_count);
 
             DPFJ_CANDIDATE matched_candidates_container[1];
             MyFMDSize expected_matches_count = 1;
@@ -195,7 +200,7 @@ class FingerPrintImpl final : public FingerPrint::Service {
 
             }
 
-            int identify_result = dpfj_identify(DPFJ_FMD_DP_VER_FEATURES, target_verify_fmd_ptr, *target_verify_fmd_size, 0, DPFJ_FMD_DP_REG_FEATURES, candidates_count, candidates_pointers_container, candidates_size_container, threshold_score, &expected_matches_count, matched_candidates_container);
+            int identify_result = dpfj_identify(DPFJ_FMD_DP_VER_FEATURES, target_verify_fmd.data(), target_verify_fmd.size(), 0, DPFJ_FMD_DP_REG_FEATURES, candidates_count, candidates_pointers_container.data(), candidates_size_container.data(), threshold_score, &expected_matches_count, matched_candidates_container);
 
             VerificationResponse* verification_response = new VerificationResponse();
             verification_response->set_match(false);
@@ -225,24 +230,20 @@ class FingerPrintImpl final : public FingerPrint::Service {
 
         }
 
-        map<MyFMD*, MyFMDSize*> convert_fmd(DPFJ_FMD_FORMAT input_fmd_formt, DPFJ_FMD_FORMAT output_fmd_format, MyFMD* input_fmd, MyFMDSize input_fmd_size) {
-            
-            MyFMD output_fmd[MY_MAX_FMD_SIZE]; // will hold the output fmd
-            MyFMDSize output_fmd_size; // will hold the original size of the output fmd
+        vector<MyFMD> convert_fmd(DPFJ_FMD_FORMAT input_fmd_formt, DPFJ_FMD_FORMAT output_fmd_format, MyFMD* input_fmd, MyFMDSize input_fmd_size) {
+            vector<MyFMD> output_fmd(MY_MAX_FMD_SIZE);
+            MyFMDSize output_fmd_size = output_fmd.size();
 
-            int conversion_result = dpfj_fmd_convert(input_fmd_formt, input_fmd, input_fmd_size, output_fmd_format, output_fmd, &output_fmd_size);
-
-            map<MyFMD*, MyFMDSize*> converted_fmd_result;
+            int conversion_result = dpfj_fmd_convert(input_fmd_formt, input_fmd, input_fmd_size, output_fmd_format, output_fmd.data(), &output_fmd_size);
 
             if (conversion_result == DPFJ_SUCCESS) {
                 cout << "FMD coverted successfully..." << endl;
-                converted_fmd_result[output_fmd] = &output_fmd_size;
-
-                return converted_fmd_result;
+                output_fmd.resize(output_fmd_size);
+                return output_fmd;
             }
 
             cout << "Unknown error..." << endl;
-            return converted_fmd_result;
+            return {};
 
         }
 };

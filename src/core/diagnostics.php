@@ -7,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once(__DIR__ . '/../../configs.php');
 
-if (fingerprint_config('DIAGNOSTICS_ENABLED', '1') !== '1') {
+if (fingerprint_config('DIAGNOSTICS_ENABLED', '0') !== '1') {
     http_response_code(404);
     echo json_encode(['ok' => false, 'error' => 'Diagnostics are disabled.']);
     exit;

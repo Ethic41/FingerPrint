@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <cstdint>
 
 /*
 Base64 translates 24 bits into 4 ASCII characters at a time. First,
@@ -26,7 +27,8 @@ const char base64_url_alphabet[] = {
 
 std::string base64_encode(const std::string & in) {
   std::string out;
-  int val =0, valb=-6;
+  std::uint32_t val = 0;
+  int valb=-6;
   size_t len = in.length();
   unsigned int i = 0;
   for (i = 0; i < len; i++) {
@@ -50,7 +52,8 @@ std::string base64_decode(const std::string & in) {
   unsigned int i;
   for (i =0; i < 64; i++) T[base64_url_alphabet[i]] = i;
 
-  int val = 0, valb = -8;
+  std::uint32_t val = 0;
+  int valb = -8;
   for (i = 0; i < in.length(); i++) {
     unsigned char c = in[i];
     if (T[c] == -1) break;

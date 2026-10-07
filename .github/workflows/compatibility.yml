@@ -23,3 +23,21 @@ jobs:
         run: find . -path './src/core/helpers/Requests' -prune -o -path './fingerprint_service/thirdparty' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Validate Compose configuration
         run: docker compose -f fingerprint_service/docker-compose.yml config --quiet
+      - name: Test PHP validation without a reader
+        run: php tests/validation.php
+      - name: Test browser behavior without a reader
+        run: node --test tests/browser.test.cjs
+      - name: Test native encoding with sanitizers
+        run: |
+          g++ -std=c++11 -fsanitize=address,undefined -fno-omit-frame-pointer -I fingerprint_service/thirdparty/grpc-fingerprint-engine/src/cpp tests/base64.cpp fingerprint_service/thirdparty/grpc-fingerprint-engine/src/cpp/base64.cc -o /tmp/fingerprint-base64-test
+          /tmp/fingerprint-base64-test
+  powershell:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse Windows preflight script
+        shell: pwsh
+        run: |
+          $parseErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("$PWD/scripts/windows-preflight.ps1", [ref]$null, [ref]$parseErrors) | Out-Null
+          if ($parseErrors.Count) { throw ($parseErrors | Out-String) }

@@ -11,10 +11,12 @@ namespace fingerprint;
 
 require(__DIR__ . "/querydb.php");
 require_once(__DIR__ . "/helpers/helpers.php");
+require_once(__DIR__ . '/validation.php');
+$validated_data = fingerprint_read_request(true);
 
 
 if(!empty($_POST["data"])){
-    $user_data = json_decode($_POST["data"]);
+    $user_data = $validated_data;
     $user_id = $user_data->id;
     $index_finger_string_array = $user_data->index_finger;
     $middle_finger_string_array = $user_data->middle_finger;
@@ -34,13 +36,14 @@ if(!empty($_POST["data"])){
     else{
         $json_response = enroll_fingerprint($pre_reg_fmd_array);
         $response = json_decode($json_response);
-        if ($response !== "enrollment failed"){
+        if (is_object($response) && fingerprint_sample_valid($response->enrolled_index_finger ?? null)
+            && fingerprint_sample_valid($response->enrolled_middle_finger ?? null)){
             $enrolled_index_finger_fmd_string = $response->enrolled_index_finger;
             $enrolled_middle_finger_fmd_string = $response->enrolled_middle_finger;
             echo setUserFmds($user_id, $enrolled_index_finger_fmd_string, $enrolled_middle_finger_fmd_string);
         }
         else{
-            echo "$response";
+            throw new \RuntimeException('Fingerprint enrollment failed.');
         }
     }
 }
@@ -61,10 +64,8 @@ function isDuplicate($fmd_to_check_string){
     $json_response = is_duplicate_fingerprint($fmd_to_check_string, $enrolled_hand_array);
     $response = json_decode($json_response);
 
-    if($response){
-        return true;
+    if (!is_bool($response)) {
+        throw new \RuntimeException('Invalid duplicate-check response.');
     }
-    else{
-        return false;
-    }
+    return $response;
 }

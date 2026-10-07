@@ -10,6 +10,8 @@
 #include <vector>
 #include <map>
 #include <cstdlib>
+#include <memory>
+#include <mutex>
 
 // DigitalPersona Includes
 #include "dpfj.h"
@@ -59,11 +61,16 @@ typedef unsigned int MyFMDSize;
 class FingerPrintImpl final : public FingerPrint::Service {
     private:
         unsigned int threshold_score = DPFJ_PROBABILITY_ONE / 1000000;
+        std::mutex engine_mutex;
 
     public:
         Status EnrollFingerprint(ServerContext* context, const EnrollmentRequest* enrollmentRequest, EnrolledFMD* enrolledFMD) {
-            //pass
-            enrolledFMD->set_base64enrolledfmd(createEnrollment(enrollmentRequest)->base64enrolledfmd());
+            std::lock_guard<std::mutex> lock(engine_mutex);
+            unique_ptr<EnrolledFMD> result(createEnrollment(enrollmentRequest));
+            if (result->base64enrolledfmd().empty()) {
+                return Status(grpc::StatusCode::FAILED_PRECONDITION, "Enrollment failed or requires more samples.");
+            }
+            enrolledFMD->set_base64enrolledfmd(result->base64enrolledfmd());
             return Status::OK;
         }
 
@@ -82,6 +89,10 @@ class FingerPrintImpl final : public FingerPrint::Service {
             }
 
             int start_enrollment_process = dpfj_start_enrollment(DPFJ_FMD_DP_REG_FEATURES);
+            struct EnrollmentCleanup {
+                bool active;
+                ~EnrollmentCleanup() { if (active) dpfj_finish_enrollment(); }
+            } cleanup{start_enrollment_process == DPFJ_SUCCESS};
 
             if (start_enrollment_process == DPFJ_SUCCESS) {
                 cout << "enrollment process started successfully" << endl;
@@ -117,19 +128,16 @@ class FingerPrintImpl final : public FingerPrint::Service {
                             string encoded_fmd = base64_encode(enrolled_fmd_ptr);
 
                             enrolled_fmd->set_base64enrolledfmd(encoded_fmd);
-                            dpfj_finish_enrollment();
                             return enrolled_fmd;
                         }
 
                         else if (enrollment_result == DPFJ_E_MORE_DATA) {
                             cout << "insufficient memory in create_enrollment_fmd()..." << endl;
-                            dpfj_finish_enrollment();
                             return enrolled_fmd;
                         }
 
                         else {
                             cout << "Unknown error occurred in create_enrollment_fmd()..." << endl;
-                            dpfj_finish_enrollment();
                             return enrolled_fmd;
                         }
 
@@ -142,7 +150,6 @@ class FingerPrintImpl final : public FingerPrint::Service {
 
                     else {
                         cout << "Unknown error occurred during add_enrollment()..." << endl;
-                        dpfj_finish_enrollment();
                         break;
                     }
 
@@ -150,15 +157,15 @@ class FingerPrintImpl final : public FingerPrint::Service {
             }
             else {
                 cout << "failed to start enrollment..." << endl;
-                dpfj_finish_enrollment();
             }
 
             return new EnrolledFMD();
         }
 
         Status VerifyFingerprint(ServerContext* context, const VerificationRequest* verification_request, VerificationResponse* verification_response) {
-            //pass
-            verification_response->set_match(makeVerification(verification_request)->match());
+            std::lock_guard<std::mutex> lock(engine_mutex);
+            unique_ptr<VerificationResponse> result(makeVerification(verification_request));
+            verification_response->set_match(result->match());
             return Status::OK;
         }
 
@@ -218,7 +225,9 @@ class FingerPrintImpl final : public FingerPrint::Service {
         }
 
         Status CheckDuplicate(ServerContext* context, const VerificationRequest* verification_request, CheckDuplicateResponse* check_duplicate_response) {
-            if (!makeVerification(verification_request)->match()) {
+            std::lock_guard<std::mutex> lock(engine_mutex);
+            unique_ptr<VerificationResponse> result(makeVerification(verification_request));
+            if (!result->match()) {
                 check_duplicate_response->set_isduplicate(false);
             }
 
@@ -236,7 +245,7 @@ class FingerPrintImpl final : public FingerPrint::Service {
 
             int conversion_result = dpfj_fmd_convert(input_fmd_formt, input_fmd, input_fmd_size, output_fmd_format, output_fmd.data(), &output_fmd_size);
 
-            if (conversion_result == DPFJ_SUCCESS) {
+            if (conversion_result == DPFJ_SUCCESS && output_fmd_size <= output_fmd.size()) {
                 cout << "FMD coverted successfully..." << endl;
                 output_fmd.resize(output_fmd_size);
                 return output_fmd;

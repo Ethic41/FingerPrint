@@ -61,8 +61,8 @@ Windows Pro alone does not establish any of these prerequisites.
 
 `src/core/diagnostics.php` tests the PHP version, `mysqli`, database connection and TCP reachability of the configured fingerprint service. It deliberately does not return passwords, full connection strings or exception traces.
 
-Set `DIAGNOSTICS_ENABLED=0` after production commissioning if this endpoint is
-not protected by the application's administrator authorization.
+Diagnostics are disabled by default. Set `DIAGNOSTICS_ENABLED=1` only during
+local setup or behind administrator authorization; turn them off afterwards.
 
 Browser capture remains a client-side check. Use the browser console and the Windows preflight script to distinguish missing JavaScript, a stopped DigitalPersona service and an undetected reader.
 

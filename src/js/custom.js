@@ -7,7 +7,7 @@
  */
 
 
-let currentFormat = Fingerprint.SampleFormat.Intermediate;
+let currentFormat = typeof Fingerprint !== "undefined" ? Fingerprint.SampleFormat.Intermediate : null;
 
 let FingerprintSdkTest = (function () {
     function FingerprintSdkTest() {
@@ -55,7 +55,8 @@ let FingerprintSdkTest = (function () {
         let _instance = this;
         showMessage("");
         this.operationToRestart = this.startCapture;
-        this.sdk.startAcquisition(currentFormat, "").then(function () {
+        const selectedReader = document.getElementById(myReader.selectFieldID);
+        this.sdk.startAcquisition(currentFormat, selectedReader ? selectedReader.value : "").then(function () {
             _instance.acquisitionStarted = true;
 
             //Disabling start once started
@@ -365,6 +366,7 @@ function storeUserID(){
 }
 
 function storeSample(sample){
+    if (!myReader.currentHand) return;
     let samples = JSON.parse(sample.samples);
     let sampleData = samples[0].Data;
 
@@ -389,10 +391,14 @@ function serverEnroll(){
         return;
     }
 
+    if (!myReader.currentHand || myReader.currentHand.index_finger.length !== 4 || myReader.currentHand.middle_finger.length !== 4) {
+        showMessage("Capture four samples of each finger before enrollment.");
+        return;
+    }
     let data = myReader.currentHand.generateFullHand();
     let successMessage = "Enrollment Successful!";
     let failedMessage = "Enrollment Failed!";
-    let payload = `data=${data}`;
+    let payload = `data=${encodeURIComponent(data)}`;
 
     let xhttp = new XMLHttpRequest();
 
@@ -420,28 +426,41 @@ function serverIdentify() {
         return;
     }
 
+    if (!myReader.currentHand || myReader.currentHand.index_finger.length < 1) {
+        showMessage("Capture a fingerprint before verification.");
+        return;
+    }
     let data = myReader.currentHand.generateFullHand();
     let detailElement = document.getElementById("userDetails");
     let successMessage = "Identification Successful!";
     let failedMessage = "Identification Failed!. Try again";
-    let payload = `data=${data}`;
+    let payload = `data=${encodeURIComponent(data)}`;
 
     let xhttp = new XMLHttpRequest();
 
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200){
             if(this.responseText !== null && this.responseText !== ""){
-                let response = JSON.parse(this.responseText);
-                if(response !== "failed" && response !== null){
+                let response;
+                try { response = JSON.parse(this.responseText); }
+                catch (error) { showMessage("The server returned an invalid response."); return; }
+                if(Array.isArray(response) && response.length && response[0]){
                     showMessage(successMessage, "success");
-                    detailElement.innerHTML = `<div class="col text-center">
-                                <label for="fullname" class="my-text7 my-pri-color">Fullname</label>
-                                <input type="text" id="fullname" class="form-control" value="${response[0].fullname}">
-                            </div>
-                            <div class="col text-center">
-                                <label for="email" class="my-text7 my-pri-color">Email</label>
-                                <input type="text" id="email" class="form-control" value="${response[0].username}">
-                            </div>`;
+                    detailElement.replaceChildren();
+                    for (const [id, label, value] of [["fullname", "Fullname", response[0].fullname], ["email", "Email", response[0].username]]) {
+                        const column = document.createElement("div");
+                        column.className = "col text-center";
+                        const caption = document.createElement("label");
+                        caption.htmlFor = id;
+                        caption.textContent = label;
+                        const input = document.createElement("input");
+                        input.id = id;
+                        input.className = "form-control";
+                        input.value = value || "";
+                        input.readOnly = true;
+                        column.append(caption, input);
+                        detailElement.appendChild(column);
+                    }
                 }
                 else {
                     showMessage(failedMessage);

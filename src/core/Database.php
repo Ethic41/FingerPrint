@@ -55,6 +55,7 @@ class Database {
     }
 
     function select($sql_query, $sql_param_type="", $param_array=array()){
+        $result_set = [];
         if ($statement = $this->connection->prepare($sql_query)){
             if (!empty($sql_param_type) && !empty($param_array)){
                 $this->bindQueryParams($statement, $sql_param_type, $param_array);
@@ -73,6 +74,7 @@ class Database {
                 return $result_set;
             }
         }
+        return [];
     }
 
     function insert($sql_query, $sql_param_type="", $param_array=array()){

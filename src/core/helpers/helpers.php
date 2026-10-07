@@ -7,7 +7,7 @@
  * @version 1.0.0
  */
 require_once(__DIR__ . '/../../../configs.php');
-require_once('Requests/src/Autoload.php');
+require_once(__DIR__ . '/Requests/src/Autoload.php');
 WpOrg\Requests\Autoload::register();
 
 set_exception_handler(function (Throwable $exception) {
@@ -17,7 +17,7 @@ set_exception_handler(function (Throwable $exception) {
     }
     echo json_encode([
         'ok' => false,
-        'error' => $exception->getMessage(),
+        'error' => 'The operation could not be completed. Check configuration and service health.',
     ]);
 });
 

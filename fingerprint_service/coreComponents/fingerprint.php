@@ -27,9 +27,9 @@ function enroll_fingerprint($pre_fmd_string_array){
 
     $enrollment_request->setFmdCandidates($pre_enrolled_fmds);
 
-    list($enrolled_fmd, $status) = $client->EnrollFingerprint($enrollment_request)->wait();
+    list($enrolled_fmd, $status) = $client->EnrollFingerprint($enrollment_request, [], ['timeout' => 10000000])->wait();
     
-    if ($status->code === Grpc\STATUS_OK) {
+    if ($status->code === Grpc\STATUS_OK && $enrolled_fmd && $enrolled_fmd->getBase64EnrolledFMD() !== '') {
         return $enrolled_fmd->getBase64EnrolledFMD();
     }
     else {
@@ -52,7 +52,12 @@ function check_duplicate($pre_fmd_string, $enrolled_fmd_string_list){
 
     $verification_request->setFmdCandidates($enrolled_fmds);
 
-    list($response, $status) = $client->CheckDuplicate($verification_request)->wait();
+    list($response, $status) = $client->CheckDuplicate($verification_request, [], ['timeout' => 10000000])->wait();
+    if ($status->code !== Grpc\STATUS_OK || !$response) {
+        http_response_code(503);
+        echo json_encode(['ok' => false, 'error' => 'Duplicate checking unavailable.']);
+        exit;
+    }
     return $response->getIsDuplicate();
 
 }
@@ -69,9 +74,9 @@ function verify_fingerprint($pre_enrolled_fmd_string, $enrolled_fmd_string){
     $verification_request = new Fingerprint\VerificationRequest(array("targetFMD" => $pre_enrolled_fmd));
     $verification_request->setFmdCandidates(array($enrolled_cand_fmd));
 
-    list($verification_response, $status) = $client->VerifyFingerprint($verification_request)->wait();
+    list($verification_response, $status) = $client->VerifyFingerprint($verification_request, [], ['timeout' => 10000000])->wait();
 
-    if ($status->code === Grpc\STATUS_OK) {
+    if ($status->code === Grpc\STATUS_OK && $verification_response) {
         return $verification_response->getMatch();
     }
     else {

@@ -10,7 +10,8 @@ $windows = Get-CimInstance Win32_OperatingSystem
 Report "Windows" ([int]$windows.BuildNumber -ge 19045) ("{0} build {1}" -f $windows.Caption, $windows.BuildNumber)
 
 $virtualization = Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty VirtualizationFirmwareEnabled
-Report "Firmware virtualization" ([bool]$virtualization) (if ($virtualization) { "enabled" } else { "enable it in BIOS/UEFI" })
+$virtualizationDetails = if ($virtualization) { "enabled" } else { "enable it in BIOS/UEFI" }
+Report "Firmware virtualization" ([bool]$virtualization) $virtualizationDetails
 
 $wsl = & wsl.exe --version 2>&1
 Report "WSL" ($LASTEXITCODE -eq 0) ($wsl -join " ")
